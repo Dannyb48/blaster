@@ -210,6 +210,9 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             # generate random unique id
             task['bid'] = str(uuid4())
 
+            # assign n/a status
+            task['status'] = 'n/a'
+
             self.logger.info('%s. task: %s, methods: %s' %
                              (index, task['task'].__name__, task['methods']))
             # add updated task to list
@@ -228,11 +231,13 @@ class Blaster(CalcTimeMixin, LoggerMixin):
             if self.results[index]['status'] != 0:
                 # before exiting we need to add all tasks that were not
                 # executed and set status of say n/a
-                for item in self.updated_tasks:
-                    if item['bid'] == task['bid']:
-                        continue
-                    item['status'] = 'n/a'
-                    self.results.append(dict(item))
+                none_executed = [dict(item) for item in self.updated_tasks
+                                 for task in self.results if item['bid'] != task['bid'] and
+                                 item['status'] == 'n/a']
+                self.results.append(none_executed)
+                #for item in self.updated_tasks:
+                #    if item['bid'] == task['bid']:
+                #    self.results.append(dict(item))
                 break
 
         # save end time
